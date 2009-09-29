@@ -6,88 +6,106 @@
   machine parser;
   
   action begin_content {
-    printf("begin_content\n");
   }
   
   action begin_pystring {
-    printf("begin_pystring\n");
   }
   
   action start_pystring {
-    printf("start_pystring\n");
   }
   
   action start_line {
-    printf("start_line\n");
   }
   
   action end_line {
-    printf("end_line\n");
   }
   
   action store_feature_content {
-    printf("store_feature_content\n");
+    rb_funcall(listener, rb_intern("feature"), 0);
+    printf(" feature body found:  ");
+    fwrite( bodys, 1, bodye - bodys, stdout );
+    printf("\n");
   }
   
   action store_background_content {
-    printf("store_background_content\n");
+    rb_funcall(listener, rb_intern("background"), 0);
   }
   
   action store_scenario_content {
-    printf("store_scenario_content\n");
+    rb_funcall(listener, rb_intern("scenario"), 0);
+    printf(" scenario body found:  ");
+    fwrite( bodys, 1, bodye - bodys, stdout );
+    printf("\n");
   }
   
   action store_scenario_outline_content {
-    printf("store_scenario_outline_content\n");
+    rb_funcall(listener, rb_intern("scenario_outline"), 0);
+    printf(" scenario body found:  ");
+    fwrite( bodys, 1, bodye - bodys, stdout );
+    printf("\n");
   }
   
   action store_examples_content {
-    printf("store_examples_content\n");
+    rb_funcall(listener, rb_intern("examples"), 0);
   }
   
   action store_step_content {
-    printf("store_step_content\n");
+    rb_funcall(listener, rb_intern("step"), 0);
   }
   
   action store_comment_content {
-    printf("store_comment_content\n");
+    rb_funcall(listener, rb_intern("comment"), 0);
   }
   
   action store_tag_content {
-    printf("store_tag_content\n");
     rb_funcall(listener, rb_intern("tag"), 0);
   }
   
   action store_pystring_content {
-    printf("store_pystring_content\n");
+    rb_funcall(listener, rb_intern("pystring"), 0);
   }
   
   action inc_line_number {
-    printf("inc_line_number\n");
   }
     
   action last_newline {
-    printf("last_newline\n");
   }
   
   action start_keyword {
-    printf("start_keyword\n");
+    ws = fpc;
+
+    if (next_keyword_start != 0) {
+      next_keyword_start = p-1;
+    }
   }
   
   action end_keyword {
-    printf("end_keyword\n");
+    we = fpc;
+    bodys = fpc + 1;
+
+    printf(" keyword found:  ");
+    fwrite( ws, 1, we - ws, stdout );
+    printf("\n");
+
+    if (next_keyword_start != 0){
+      p = next_keyword_start;
+    }
+    next_keyword_start = 0;
   }
   
   action next_keyword_start {
-    printf("next_keyword_start\n");
+    bodye = fpc;
+
+    if(next_keyword_start == 0) {
+      next_keyword_start = fpc;
+    }
   }
   
   action end_table {
-    printf("end_table\n");
+    rb_funcall(listener, rb_intern("table"), 0);
   }
  
   action end_feature {
-    printf("end_feature\n");
   }
   
   include parser_common "parser_common.<%= i18n_language %>.rl"; 
@@ -105,14 +123,25 @@ static VALUE CParser_init(VALUE self, VALUE listener)
   return self;
 }
 
+#define MAXWORDS 2
+
 static VALUE CParser_scan(VALUE self, VALUE text)
 {
   int cs;
+  int i = 0;
+
+  char *ws;
+  char *we;
+  char *bodys;
+  char *bodye;
+
+  char *next_keyword_start = 0;
+
   char *p = RSTRING(text)->ptr;
   strcat(p, "\n%_FEATURE_END_%");
   char *pe = p + strlen(p);
   char *eof = pe;
-  
+
   VALUE listener = rb_iv_get(self, "@listener");
   
   %%{
