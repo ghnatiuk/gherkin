@@ -63,7 +63,7 @@ module Gherkin
 
     def expected
       allowed = @machine[@state].find_all { |_, action| action != "E" }
-      allowed.collect { |state| state[0] }
+      allowed.collect { |state| state[0] }.sort
     end
 
     def set_machine(machine_name)
