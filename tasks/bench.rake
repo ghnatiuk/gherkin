@@ -103,10 +103,15 @@ class Benchmarker
       end
     end
   end
+  
+  class NullFormatter
+    def method_missing(*any)
+
+    end
+  end
 
   def run_rb_gherkin    
     require 'gherkin'
-    require 'null_formatter'
     parser = Gherkin::Parser::Parser.new(NullFormatter.new, true, "root", true)
     @features.each do |feature|
       parser.parse(File.read(feature), feature, 0)
@@ -115,7 +120,6 @@ class Benchmarker
 
   def run_native_gherkin
     require 'gherkin'
-    require 'null_listener'
     parser = Gherkin::Parser::Parser.new(NullFormatter.new, true, "root", false)
     @features.each do |feature|
       parser.parse(File.read(feature), feature, 0)

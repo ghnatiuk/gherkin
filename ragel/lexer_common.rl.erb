@@ -22,11 +22,11 @@
   ScenarioOutlineHeadingEnd = EOL+ space* ( I18N_Feature | I18N_Scenario | I18N_Step | '@' | '#' | EOF ) >next_keyword_start;
   ExamplesHeadingEnd = EOL+ space* ( I18N_Feature | '|' | '#') >next_keyword_start;
  
-  FeatureHeading = space* I18N_Feature %begin_content !FeatureHeadingEnd :>> FeatureHeadingEnd @store_feature_content;
-  BackgroundHeading = space* I18N_Background %begin_content !BackgroundHeadingEnd :>> BackgroundHeadingEnd @store_background_content;
-  ScenarioHeading = space* I18N_Scenario %begin_content !ScenarioHeadingEnd :>> ScenarioHeadingEnd @store_scenario_content;
-  ScenarioOutlineHeading = space* I18N_ScenarioOutline %begin_content !ScenarioOutlineHeadingEnd :>> ScenarioOutlineHeadingEnd @store_scenario_outline_content;
-  ExamplesHeading = space* I18N_Examples %begin_content !ExamplesHeadingEnd :>> ExamplesHeadingEnd @store_examples_content;
+  FeatureHeading = space* I18N_Feature %begin_content any* :>> FeatureHeadingEnd @store_feature_content;
+  BackgroundHeading = space* I18N_Background %begin_content any* :>> BackgroundHeadingEnd @store_background_content;
+  ScenarioHeading = space* I18N_Scenario %begin_content any* :>> ScenarioHeadingEnd @store_scenario_content;
+  ScenarioOutlineHeading = space* I18N_ScenarioOutline %begin_content any* :>> ScenarioOutlineHeadingEnd @store_scenario_outline_content;
+  ExamplesHeading = space* I18N_Examples %begin_content any* :>> ExamplesHeadingEnd @store_examples_content;
 
   Step = space* I18N_Step %begin_content ^EOL+ %store_step_content :> EOL+;
   Comment = space* '#' >begin_content ^EOL* %store_comment_content :> EOL+;
